@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,9 +41,6 @@ import java.util.Date;
 import java.util.List;
 
 public class ResultPage extends AppCompatActivity {
-    private String helmResult;
-    private String vestResult;
-    private String bootsResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,22 +52,47 @@ public class ResultPage extends AppCompatActivity {
             return insets;
         });
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            helmResult = extras.getString("helm_result");
-            vestResult = extras.getString("vest_result");
-            bootsResult = extras.getString("boots_result");
+        String helm = getIntent().getStringExtra("helm_result");
+        String vest = getIntent().getStringExtra("vest_result");
+        String boots = getIntent().getStringExtra("boots_result");
 
-            Log.d("ResultPage", "Hasil Helm: " + (helmResult != null ? helmResult : "null"));
-            Log.d("ResultPage", "Hasil Vest: " + (vestResult != null ? vestResult : "null"));
-            Log.d("ResultPage", "Hasil Boots: " + (bootsResult != null ? bootsResult : "null"));
-        }
+        String[] helmParts = helm.split(",");
+        String helmResult = helmParts[0].split(":")[1].trim();
+
+        String[] vestParts = vest.split(",");
+        String vestResult = vestParts[0].split(":")[1].trim();
+
+        String[] bootsParts = boots.split(",");
+        String bootsResult = bootsParts[0].split(":")[1].trim();
 
         TextView statusHelmTextView = findViewById(R.id.statusHelm);
         TextView statusVestTextView = findViewById(R.id.statusVest);
         TextView statusSepatuTextView = findViewById(R.id.statusSepatu);
 
 
+        if ("helm".equals(helmResult)) {
+            statusHelmTextView.setText("OK");
+            statusHelmTextView.setTextColor(Color.GREEN);
+        } else {
+            statusHelmTextView.setText("GAGAL");
+            statusHelmTextView.setTextColor(Color.RED);
+        }
+
+        if ("rompi".equals(vestResult)) {
+            statusVestTextView.setText("OK");
+            statusVestTextView.setTextColor(Color.GREEN);
+        } else {
+            statusVestTextView.setText("GAGAL");
+            statusVestTextView.setTextColor(Color.RED);
+        }
+
+        if ("sepatu".equals(bootsResult)) {
+            statusSepatuTextView.setText("OK");
+            statusSepatuTextView.setTextColor(Color.GREEN);
+        } else {
+            statusSepatuTextView.setText("GAGAL");
+            statusSepatuTextView.setTextColor(Color.RED);
+        }
 
         Button scanButton = findViewById(R.id.scanLagi);
         Button backButton = findViewById(R.id.kembali);

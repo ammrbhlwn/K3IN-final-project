@@ -55,9 +55,7 @@ public class BootsPage extends AppCompatActivity {
     private ImageCapture imageCapture;
     private ImageView imageView;
     private File imageFile;
-    private String classValue;
-    private String helmResult;
-    private String vestResult;
+    String classValue;
     private static final int MY_PERMISSIONS_REQUEST_WRITE = 223;
 
     private static final String API_KEY = "xGN6YojLgOgSpQireQaH";
@@ -74,11 +72,8 @@ public class BootsPage extends AppCompatActivity {
         Button retake = findViewById(R.id.retake);
         imageView = findViewById(R.id.capturedImageView);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            helmResult = extras.getString("helm_result");
-            vestResult = extras.getString("vest_result");
-        }
+        String helmResult = getIntent().getStringExtra("helm_result");
+        String vestResult = getIntent().getStringExtra("vest_result");
 
         next.setOnClickListener(view -> {
             Intent intent = new Intent(BootsPage.this, ResultPage.class);
@@ -121,14 +116,16 @@ public class BootsPage extends AppCompatActivity {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 displayCapturedImage(uriSavedImage);
+
+                Snackbar.make(findViewById(android.R.id.content), "Tunggu Sebentar.....", Snackbar.LENGTH_LONG).show();
+
                 new Thread(() -> {
                     try {
                         String result = sendMultipartRequest(UPLOAD_URL, imageFile);
-                        String[] parts = result.split(",");
-                        classValue = parts[0].split(":")[1].trim();
+                        classValue = result;
                         runOnUiThread(() -> {
-                            Log.d("BootsPage", "Hasil Prediksi: " + classValue);
-                            Snackbar.make(findViewById(android.R.id.content), "Hasil Prediksi: " + classValue, Snackbar.LENGTH_LONG).show();
+                            Log.d("BootsPage", "Hasil Prediksi: " + result);
+                            Snackbar.make(findViewById(android.R.id.content), "Deteksi Selesai. Silahkan Lanjutkan", Snackbar.LENGTH_LONG).show();
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -174,6 +171,13 @@ public class BootsPage extends AppCompatActivity {
     }
 
     private void startCamera(ProcessCameraProvider cameraProvider) {
+        if (imageFile != null && imageFile.exists()) {
+            boolean deleted = imageFile.delete();
+            if (deleted) {
+                Log.d("HelmPage", "Temporary image file deleted.");
+            }
+        }
+
         askWritePermission();
 
         CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
@@ -287,19 +291,24 @@ public class BootsPage extends AppCompatActivity {
                 JSONObject jsonResponse = new JSONObject(result.toString());
                 JSONArray predictions = jsonResponse.getJSONArray("predictions");
 
-                for (int i = 0; i < predictions.length(); i++) {
-                    JSONObject prediction = predictions.getJSONObject(i);
-                    String detectedClass = prediction.getString("class");
+                try {
+                    for (int i = 0; i < predictions.length(); i++) {
+                        JSONObject prediction = predictions.getJSONObject(i);
+                        String detectedClass = prediction.getString("class");
+                        double confidence = prediction.getDouble("confidence");
 
-                    if ("sepatu".equalsIgnoreCase(detectedClass)) {
-                        filteredResult.append("Class: ").append(detectedClass)
-                                .append(", Confidence: ").append(prediction.getDouble("confidence"))
-                                .append("\n");
+                        if ("boots".equals(detectedClass)) {
+                            filteredResult.append("Class: ").append(detectedClass)
+                                    .append(", Confidence: ").append(confidence)
+                                    .append("\n");
+                        } else {
+                            filteredResult.append("Class: Not Found")
+                                    .append(", Confidence: -1")
+                                    .append("\n");
+                        }
                     }
-                    else {
-                        filteredResult.append("Class: gagal")
-                                .append(", Confidence: gagal").append("\n");
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 

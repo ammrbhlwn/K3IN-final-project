@@ -122,6 +122,7 @@
         android:layout_height="70dp"
         android:backgroundTint="@color/blue_main"
         android:text="Scan Lagi"
+        android:textColor="@color/white"
         android:textSize="25dp"
         android:layout_marginBottom="20dp"/>
 
@@ -131,5 +132,6 @@
         android:layout_height="70dp"
         android:backgroundTint="@color/blue_main"
         android:textSize="25dp"
+        android:textColor="@color/white"
         android:text="Kembali" />
 </LinearLayout>
