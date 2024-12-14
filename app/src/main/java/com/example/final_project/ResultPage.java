@@ -40,9 +40,9 @@ import java.util.Date;
 import java.util.List;
 
 public class ResultPage extends AppCompatActivity {
-    String fotoHelmPath;
-    String fotoVestPath;
-    String fotoSepatuPath;
+    private String helmResult;
+    private String vestResult;
+    private String bootsResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +54,22 @@ public class ResultPage extends AppCompatActivity {
             return insets;
         });
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            helmResult = extras.getString("helm_result");
+            vestResult = extras.getString("vest_result");
+            bootsResult = extras.getString("boots_result");
+
+            Log.d("ResultPage", "Hasil Helm: " + (helmResult != null ? helmResult : "null"));
+            Log.d("ResultPage", "Hasil Vest: " + (vestResult != null ? vestResult : "null"));
+            Log.d("ResultPage", "Hasil Boots: " + (bootsResult != null ? bootsResult : "null"));
+        }
+
         TextView statusHelmTextView = findViewById(R.id.statusHelm);
         TextView statusVestTextView = findViewById(R.id.statusVest);
         TextView statusSepatuTextView = findViewById(R.id.statusSepatu);
 
-        fotoHelmPath = getIntent().getStringExtra("fotoHelmPath");
-        fotoVestPath = getIntent().getStringExtra("fotoVestPath");
-        fotoSepatuPath = getIntent().getStringExtra("fotoSepatuPath");
+
 
         Button scanButton = findViewById(R.id.scanLagi);
         Button backButton = findViewById(R.id.kembali);
@@ -78,35 +87,8 @@ public class ResultPage extends AppCompatActivity {
         scanButton.setOnClickListener(buttonClickListener);
         backButton.setOnClickListener(buttonClickListener);
 
-        if (fotoHelmPath == null) {
-            Log.e("ResultPage", "fotoHelmPath is null. Please check intent extras.");
-            return;
-        } else {
-            Log.e("ResultPage", fotoHelmPath);
-            Log.e("ResultPage", fotoVestPath);
-            Log.e("ResultPage", fotoSepatuPath);
-            performInference();
-        }
+
     }
 
-    private void performInference() {
-        InferenceLocal inferenceLocal = new InferenceLocal();
-        inferenceLocal.Infer(fotoHelmPath, new InferenceLocal.InferenceCallback() {
-            @Override
-            public void onResult(String detectedClass) {
-                runOnUiThread(() -> {
-                    Toast.makeText(ResultPage.this, "Detected class: " + detectedClass, Toast.LENGTH_SHORT).show();
-                    Log.d("ResultPage", "Inference Result: " + detectedClass);
-                });
-            }
 
-            @Override
-            public void onError(Exception e) {
-                runOnUiThread(() -> {
-                    Toast.makeText(ResultPage.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e("ResultPage", "Error during inference", e);
-                });
-            }
-        });
-    }
 }
