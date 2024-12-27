@@ -297,7 +297,7 @@ public class BootsPage extends AppCompatActivity {
                         String detectedClass = prediction.getString("class");
                         double confidence = prediction.getDouble("confidence");
 
-                        if ("boots".equals(detectedClass)) {
+                        if ("sepatu".equals(detectedClass)) {
                             filteredResult.append("Class: ").append(detectedClass)
                                     .append(", Confidence: ").append(confidence)
                                     .append("\n");
